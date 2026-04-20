@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "JunTech Review",
+  "version": "1.1.0",
+  "description": "Phân tích toàn bộ đánh giá sản phẩm Shopee + TikTok Shop, đưa ra khuyến nghị mua hàng và xuất Excel.",
+  "permissions": ["storage", "tabs", "scripting"],
+  "host_permissions": [
+    "https://shopee.vn/*",
+    "https://shopee.com/*",
+    "https://shop.tiktok.com/*",
+    "https://www.tiktok.com/*",
+    "https://vt.tiktok.com/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "JunTech Review"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://shop.tiktok.com/view/product/*",
+        "https://www.tiktok.com/shop/pdp/*"
+      ],
+      "js": ["content/tiktokshop-content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

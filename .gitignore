@@ -1,0 +1,24 @@
+# Claude Code session files + hooks
+.claude/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node (if ever added)
+node_modules/
+package-lock.json
+
+# Build artifacts
+dist/
+build/
+*.log
+
+# Leftover test files
+response.json

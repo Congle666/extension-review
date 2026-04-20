@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <title>JunTech Review</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+
+    <!-- ============ HEADER ============ -->
+    <header class="header">
+      <div class="header__brand">
+        <div class="logo" aria-label="Logo JunTech">JT</div>
+        <div class="header__text">
+          <h1 class="header__title">JunTech Review</h1>
+          <p class="header__subtitle">Phân tích đánh giá Shopee thông minh</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- ============ MAIN ============ -->
+    <main class="main">
+
+      <!-- Card nhập URL + tuỳ chọn -->
+      <section class="card">
+        <div class="url-input-wrapper">
+          <div class="url-header">
+            <label class="label" for="urlInput">Link sản phẩm Shopee</label>
+            <button id="useCurrentTabBtn" class="btn-icon" type="button"
+                    title="Lấy URL từ tab hiện tại">
+              🔄 Tab hiện tại
+            </button>
+          </div>
+
+          <div id="detectionBadge" class="detection-badge hidden">
+            <span class="badge-icon">✓</span>
+            <span class="badge-text">Đã phát hiện sản phẩm</span>
+          </div>
+
+          <div id="platformHint" class="platform-hint hidden">
+            <span class="platform-hint__icon">💡</span>
+            <span id="platformHintText" class="platform-hint__text"></span>
+          </div>
+
+          <textarea
+            id="urlInput"
+            class="textarea"
+            rows="2"
+            placeholder="Dán link Shopee hoặc bấm '🔄 Tab hiện tại'..."
+          ></textarea>
+        </div>
+
+        <label class="label" for="maxReviews">Số review tối đa</label>
+        <select id="maxReviews" class="select">
+          <option value="100">100</option>
+          <option value="300" selected>300</option>
+          <option value="500">500</option>
+          <option value="1000">1000</option>
+          <option value="5000">5000</option>
+        </select>
+
+        <button id="btnAnalyze" class="btn btn--primary" type="button">
+          🔍 Phân tích ngay
+        </button>
+      </section>
+
+      <!-- Khu vực báo lỗi (ẩn ban đầu) -->
+      <section id="errorBox" class="card card--error hidden" role="alert">
+        <span class="error__icon">⚠️</span>
+        <span id="errorMessage" class="error__message"></span>
+      </section>
+
+      <!-- Khu vực progress (ẩn ban đầu) -->
+      <section id="loadingBox" class="card hidden">
+        <p id="loadingLabel" class="loading__label">Đang tải...</p>
+        <div class="progress">
+          <div id="progressBar" class="progress__bar" style="width: 0%"></div>
+        </div>
+      </section>
+
+      <!-- Khu vực kết quả (ẩn ban đầu). Renderer ghi đè innerHTML của #resultContent. -->
+      <section id="resultBox" class="result-box hidden">
+        <div id="resultContent" class="result__content">
+          <!-- Nội dung kết quả sẽ render ở đây -->
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ============ FOOTER ============ -->
+    <footer class="footer">
+      <button id="donateBtn" class="btn btn--ghost" type="button">
+        ☕ Ủng hộ tác giả
+      </button>
+      <p class="footer__credit">Made with 💛 by JunTech</p>
+    </footer>
+
+  </div>
+
+  <!-- ============ MODAL "Mở tab TikTok Shop" (ẩn ban đầu) ============ -->
+  <div id="openTabModal" class="modal-overlay hidden">
+    <div class="modal-content modal-content--small">
+      <button class="modal-close" id="closeOpenTabBtn" aria-label="Đóng">×</button>
+      <div class="modal-header">
+        <h2>🎵 Mở trang TikTok Shop</h2>
+        <p class="modal-subtitle">
+          TikTok Shop cần mở sản phẩm trong tab riêng để extension có thể vớt
+          review. Bạn có muốn extension tự mở tab đó không?
+        </p>
+      </div>
+      <div class="modal-actions">
+        <button id="openTabConfirmBtn" class="btn btn--primary" type="button">
+          Mở tab tự động
+        </button>
+        <button id="openTabCancelBtn" class="btn btn--ghost" type="button">
+          Hủy
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MODAL DONATE (ẩn ban đầu) ============ -->
+  <div id="donateModal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <button class="modal-close" id="closeDonateBtn" aria-label="Đóng">×</button>
+
+      <div class="modal-header">
+        <h2>💛 Cảm ơn bạn đã ủng hộ!</h2>
+        <p class="modal-subtitle">
+          JunTech Review hoàn toàn miễn phí. Nếu thấy hữu ích,
+          bạn có thể mời mình ly cà phê để duy trì và phát triển nhé 🙏
+        </p>
+      </div>
+
+      <div class="donate-tabs">
+        <button class="donate-tab active" data-tab="vietnam" type="button">🇻🇳 Chuyển khoản</button>
+        <button class="donate-tab" data-tab="international" type="button">🌍 Quốc tế</button>
+      </div>
+
+      <div class="donate-tab-content active" id="tab-vietnam">
+        <div class="qr-container">
+          <img id="vietqrImg" src="" alt="VietQR Code" class="qr-image" />
+        </div>
+        <div class="bank-info">
+          <div class="bank-row">
+            <span class="bank-label">Ngân hàng:</span>
+            <span class="bank-value" id="bankName"></span>
+          </div>
+          <div class="bank-row">
+            <span class="bank-label">Số tài khoản:</span>
+            <span class="bank-value bank-account" id="bankAccount"></span>
+            <button class="btn-copy" id="copyAccountBtn" type="button">📋 Copy</button>
+          </div>
+          <div class="bank-row">
+            <span class="bank-label">Chủ TK:</span>
+            <span class="bank-value" id="bankOwner"></span>
+          </div>
+          <div class="bank-row">
+            <span class="bank-label">Nội dung CK:</span>
+            <span class="bank-value">Donate JunTech</span>
+          </div>
+        </div>
+        <p class="donate-tip">💡 Quét QR bằng app ngân hàng để chuyển nhanh</p>
+      </div>
+
+      <div class="donate-tab-content" id="tab-international">
+        <a id="bmcLink" href="#" target="_blank" rel="noopener noreferrer"
+           class="donate-international-btn bmc-btn">
+          ☕ Buy Me a Coffee
+        </a>
+      </div>
+
+      <div class="modal-footer">
+        <p>Mọi đóng góp dù nhỏ đều rất ý nghĩa với mình ❤️</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast (auto-fade). showToast() sẽ ghi text vào element này. -->
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- SheetJS Community (đọc/ghi xlsx). Lưu ý: bản community KHÔNG ghi cell styling. -->
+  <script src="lib/xlsx.full.min.js"></script>
+
+  <!-- Adapter pattern (load order: base → registry → các adapter cụ thể) -->
+  <script src="adapters/base-adapter.js"></script>
+  <script src="adapters/adapter-registry.js"></script>
+  <script src="adapters/shopee-adapter.js"></script>
+  <script src="adapters/tiktokshop-adapter.js"></script>
+
+  <!-- Phân tích + Excel export (platform-agnostic) -->
+  <script src="analysis/analyzer.js"></script>
+  <script src="analysis/exporter.js"></script>
+
+  <!-- Orchestrator (cuối cùng, depends on tất cả) -->
+  <script src="popup.js"></script>
+</body>
+</html>
